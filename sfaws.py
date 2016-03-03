@@ -6,6 +6,7 @@ from boto3.session import Session
 import collections
 import re
 from prettytable import PrettyTable
+from datetime import datetime
 
 
 def ec2_pricing_info():
@@ -52,6 +53,7 @@ def ec2_servers_by_deployment(ec2, deployment_classfier):
             instance_info.update({
                 'type': inst.instance_type,
                 'deployment': deployment_name,
+                'launch_time': inst.launch_time,
                 'cost':
                 float(
                     ec2info[inst.instance_type]
@@ -64,26 +66,36 @@ def ec2_servers_by_deployment(ec2, deployment_classfier):
 
 def summarize(by_deployment):
     summ = {}
+    now = datetime.utcnow()
     for dep, ilist in by_deployment.items():
         total = 0
         cnt = 0
+        mindt = now
         for il in ilist:
             cnt += 1
             total += il["cost"]
+            mindt = min(mindt, il["launch_time"].replace(tzinfo=None))
+        total_cost = total * ((now - mindt).total_seconds()/3600.0)
         summ[dep] = {"cnt": cnt, "total": total,
                      "deployment": il["deployment"],
-                     "deployment_id": dep}
+                     "deployment_id": dep,
+                     "launch_time": mindt,
+                     "total_cost": int(total_cost)}
     return summ
 
 
 def report(summary):
     pt = PrettyTable(['deployment', 'deploymentId',
-                      'serverCount', 'costPerHour'],
+                      'serverCount', 'costPerHour',
+                      'runningSince', '$ totalSpend'],
                      padding=0, border=True, header=True)
     for dep in summary.values():
         pt.add_row((dep["deployment"], dep["deployment_id"],
-                    dep["cnt"], dep["total"]))
-    print pt.get_string(sortby='costPerHour')
+                    dep["cnt"], dep["total"],
+                    dep["launch_time"].strftime("%Y-%m-%d"),
+                    dep["total_cost"]))
+    pt.align["$ totalSpend"] = "r"
+    print pt.get_string(sortby='$ totalSpend', reversesort=True)
 
 
 def get_ec2_connection(profile, region):
