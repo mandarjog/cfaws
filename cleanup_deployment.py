@@ -7,7 +7,7 @@ def get_args():
     import argparse
     argp = argparse.ArgumentParser()
     argp.add_argument('--profile')
-    argp.add_argument('--yes', default=False, type=bool)
+    argp.add_argument('--yes', default=False, action='store_true')
     argp.add_argument('--stack-name', required=True)
     argp.add_argument('--region', default='us-east-1')
     return argp
