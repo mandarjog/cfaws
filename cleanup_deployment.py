@@ -32,17 +32,24 @@ def cleanup_s3(stack_name, session, yes):
     stackbuckets = [_bb for _bb in s3.buckets.filter()
                     if _bb.name.startswith(stack_name+"-")]
 
-    print "Deleting buckets {}".format([b.name for b in stackbuckets])
+    if len(stackbuckets) == 0:
+        print "Nothing to delete"
+        return 0
+
+    print "Deleting {} buckets {}".format(len(stackbuckets),
+                                          [b.name for b in stackbuckets])
     if not yes:
-        confirm = raw_input("This cannot be recovered.Proceed? YES/NO ")
+        confirm = raw_input("This cannot be recovered. Proceed? YES/NO ")
         if confirm.lower() != 'yes':
             print "Skipping"
-            return
+            return -1
 
     for bk in stackbuckets:
-        print "Deleting {}".format(bk)
+        print "Deleting {}".format(bk.name)
         bk.objects.delete()
         bk.delete()
+
+    return 0
 
 if __name__ == "__main__":
     import sys
