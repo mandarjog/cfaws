@@ -2,8 +2,25 @@
 cloud foundry cf tools
 
 ## cleanup a stack that was produced by the cf template 
+
+## usage
 ```shell
-mjog@ mac ~/CFWORK/cfaws$ python ./cleanup_deployment.py --stack-name mjog-pcf-09093b
+mjog@ mac ~/CFWORK/cfaws$ ./cleanup_deployment.py --help
+usage: cleanup_deployment.py [-h] [--profile PROFILE] [--yes] [--remove-stack]
+                             --stack-name STACK_NAME [--region REGION]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --profile PROFILE
+  --yes
+  --remove-stack
+  --stack-name STACK_NAME
+  --region REGION
+```
+
+### example session
+```shell
+mjog@ mac ~/CFWORK/cfaws$ python ./cleanup_deployment.py --stack-name mjog-pcf-09093b --remove-stack
 Removing 18 ec2 instances
 This cannot be recovered. Proceed? YES/NO YES
 Waiting for instance clock_global-partition-8797d58e6e3a7dd0fe25/0 to terminate
@@ -27,11 +44,11 @@ Waiting for instance diego_brain-partition-8797d58e6e3a7dd0fe25/0 to terminate
 
 Removing 5 s3 buckets
 This cannot be recovered. Proceed? YES/NO YES
-Deleting mjog-pcf-09093b-opsmanstack-pcfopsmanagers3bucket-1hap7t4xwjc1d
-Deleting mjog-pcf-09093b-pcfelasticruntimes3buildpacksbuck-4i6w6yqkeyud
-Deleting mjog-pcf-09093b-pcfelasticruntimes3dropletsbucket-rtujdkrixwhu
-Deleting mjog-pcf-09093b-pcfelasticruntimes3packagesbucket-13rxtn7hpmo3b
-Deleting mjog-pcf-09093b-pcfelasticruntimes3resourcesbucke-rcjdasyu36t2
+Emptying mjog-pcf-09093b-opsmanstack-pcfopsmanagers3bucket-1hap7t4xwjc1d
+Emptying mjog-pcf-09093b-pcfelasticruntimes3buildpacksbuck-4i6w6yqkeyud
+Emptying mjog-pcf-09093b-pcfelasticruntimes3dropletsbucket-rtujdkrixwhu
+Emptying mjog-pcf-09093b-pcfelasticruntimes3packagesbucket-13rxtn7hpmo3b
+Emptying mjog-pcf-09093b-pcfelasticruntimes3resourcesbucke-rcjdasyu36t2
 
 Removing Stack
 ```
