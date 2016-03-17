@@ -24,6 +24,7 @@ def get_args():
     argp = argparse.ArgumentParser()
     argp.add_argument('--profile')
     argp.add_argument('--yes', default=False, action='store_true')
+    argp.add_argument('--remove-stack', default=False, action='store_true')
     argp.add_argument('--stack-name', required=True)
     argp.add_argument('--region', default='us-east-1')
     return argp
@@ -43,7 +44,9 @@ def main(argv):
         stack_vars = get_stack_outputvars(stack, ec2)
         cleanup_ec2(stack, stack_vars, ec2, args.yes)
         cleanup_s3(stack, stack_vars, s3, args.yes)
-        stack.delete()
+        if args.remove_stack is True:
+            print "Removing stack"
+            stack.delete()
     except botocore.exceptions.NoCredentialsError as ex:
         print ex
         print "Missing ~/.aws/credentials directory?"
@@ -104,7 +107,6 @@ def cleanup_s3(stack, stack_vars, s3, yes):
         print "Deleting {}".format(bk.name)
         try:
             bk.objects.delete()
-            bk.delete()
         except botocore.exceptions.ClientError as ce:
             if ce.response['Error']['Code'] != '404':
                 print ce
