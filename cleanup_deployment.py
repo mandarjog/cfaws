@@ -46,6 +46,8 @@ def main(argv):
         cleanup_s3(stack, stack_vars, s3, args.yes)
         if args.remove_stack is True:
             print "Removing stack"
+            if confirm_oprn("Stack "+args.stack_name, 1, args.yes) is False:
+                return -1
             stack.delete()
     except botocore.exceptions.NoCredentialsError as ex:
         print ex
@@ -96,7 +98,7 @@ def cleanup_s3(stack, stack_vars, s3, yes):
         'PcfElasticRuntimeS3DropletsBucket',
         'PcfElasticRuntimeS3PackagesBucket',
         'PcfElasticRuntimeS3ResourcesBucket']
-    bset = set([stack_vars[k] for k in delkeys])
+    bset = set([stack_vars[k] for k in delkeys if k in stack_vars])
 
     stackbuckets = [bk for bk in s3.buckets.all() if bk.name in bset]
 
@@ -104,7 +106,7 @@ def cleanup_s3(stack, stack_vars, s3, yes):
         return -1
 
     for bk in stackbuckets:
-        print "Deleting {}".format(bk.name)
+        print "Emptying {}".format(bk.name)
         try:
             bk.objects.delete()
         except botocore.exceptions.ClientError as ce:
