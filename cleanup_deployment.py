@@ -68,7 +68,7 @@ def cleanup_ec2(stack, stack_vars, ec2, yes):
         InstanceIds=[ii.id for ii in insts])
 
     def getname(iii):
-        return next(v['Value'] for v in iii.tags if v['Key'] == 'Name')
+        return next((v['Value'] for v in iii.tags if v['Key'] == 'Name'), "")
 
     for ii in insts:
         print "Waiting for instance {} to terminate".format(getname(ii))
