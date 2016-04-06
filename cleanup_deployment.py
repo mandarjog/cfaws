@@ -42,13 +42,17 @@ def main(argv):
             print "Stack in no longer active"
             return 0
         stack_vars = get_stack_outputvars(stack, ec2)
-        cleanup_ec2(stack, stack_vars, ec2, args.yes)
+        cleanup_ec2(stack, stack_vars, ec2, args.yes, exclude_nat=True)
         cleanup_s3(stack, stack_vars, s3, args.yes)
         if args.remove_stack is True:
             print "Removing stack"
             if confirm_oprn("Stack "+args.stack_name, 1, args.yes) is False:
                 return -1
+            cleanup_ec2(stack, stack_vars, ec2, args.yes, exclude_nat=False)
             stack.delete()
+        else:
+            print "Stack was not deleted."
+            print "Re-run the same command with --remove-stack"
     except botocore.exceptions.NoCredentialsError as ex:
         print ex
         print "Missing ~/.aws/credentials directory?"
@@ -58,17 +62,26 @@ def main(argv):
     return 0
 
 
-def cleanup_ec2(stack, stack_vars, ec2, yes):
+def cleanup_ec2(stack, stack_vars, ec2, yes, exclude_nat=True):
+
+    def getname(iii):
+        return next((v['Value'] for v in iii.tags if v['Key'] == 'Name'), "")
+
+    selector = lambda x: True
+    if exclude_nat is True:
+        selector = lambda x: getname(x) != 'NAT Instance'
+
     insts = [ii for ii in ec2.instances.filter(
-        Filters=[{'Name': 'vpc-id', 'Values': [stack_vars['PcfVpc']]}])]
+        Filters=[{'Name': 'vpc-id', 'Values': [stack_vars['PcfVpc']]},
+                 {'Name': 'instance-state-name',
+                  'Values': ['running', 'stopping', 'stopped']}])
+             if selector(ii)]
+
     if confirm_oprn("ec2 instances", len(insts), yes) is False:
         return -1
 
     ec2.meta.client.terminate_instances(
         InstanceIds=[ii.id for ii in insts])
-
-    def getname(iii):
-        return next((v['Value'] for v in iii.tags if v['Key'] == 'Name'), "")
 
     for ii in insts:
         print "Waiting for instance {} to terminate".format(getname(ii))
