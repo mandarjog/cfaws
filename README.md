@@ -1,6 +1,18 @@
 # cfaws
 cloud foundry cf tools
 
+## how much are we spending on deployments
+```shell
+mjog@ mac ~/CFWORK/cfaws$ ./sfaws.py
++-----------------+--------------+-------------+-------------+--------------+--------------+
+|    deployment   | deploymentId | serverCount | costPerHour | runningSince | $ totalSpend |
++-----------------+--------------+-------------+-------------+--------------+--------------+
+|       dnw       | GEXX17BX9LAL |      2      |    0.666    |  2016-04-05  |           24 |
+| mjog-pcf-111fff | EMLZDGKKBJ6S |      18     |    2.601    |  2016-04-06  |            3 |
++-----------------+--------------+-------------+-------------+--------------+--------------+
+```
+
+
 ## cleanup a stack that was produced by the cf template 
 
 ## usage
