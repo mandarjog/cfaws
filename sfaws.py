@@ -38,7 +38,7 @@ def cloudFormation_templatename_classifier():
     return classifier
 
 
-def ec2_servers_by_deployment(ec2, deployment_classfier):
+def ec2_servers_by_deployment(ec2, deployment_classfier, region):
     """
     given ec2 connection and a deployment_classfier
     return a dict of deployment --> instance info
@@ -57,7 +57,7 @@ def ec2_servers_by_deployment(ec2, deployment_classfier):
                 'cost':
                 float(
                     ec2info[inst.instance_type]
-                           ['pricing']['us-east-1']['linux']['ondemand'])
+                           ['pricing'][region]['linux']['ondemand'])
             })
             by_deployment[deployment_id].append(instance_info)
 
@@ -116,7 +116,8 @@ def main(argv):
     ec2 = get_ec2_connection(args.profile, args.region)
     try:
         report(summarize(ec2_servers_by_deployment(
-            ec2, cloudFormation_templatename_classifier())))
+            ec2, cloudFormation_templatename_classifier(),
+            args.region)))
     except botocore.exceptions.NoCredentialsError as ex:
         print ex
         print "Missing ~/.aws/credentials directory?"
